@@ -1,9 +1,8 @@
-use ncurses;
+use std::thread;
+
+mod blasphemy;
 
 fn main() {
-    ncurses::initscr();
-    ncurses::addstr("Hello, world!");
-    ncurses::refresh();
-    ncurses::getch();
-    ncurses::endwin();
+	let ui_thread = thread::spawn(blasphemy::run);
+	ui_thread.join().unwrap();
 }
