@@ -12,68 +12,86 @@ struct Vector {
 	pub y: i32,
 }
 
+struct Blasphemy {
+	gamestate: Gamestate,
+	term_size: Vector,
+}
+
+struct Gamestate {
+	pub word: String,
+}
+
+impl Blasphemy {
+	pub fn new() -> Self {
+		initscr();
+		keypad(stdscr(), true);
+		cbreak();
+		timeout(INPUT_TIMEOUT);
+		noecho();
+
+		Blasphemy {
+			gamestate: Gamestate {
+				word: String::with_capacity(24)
+			},
+			term_size: Vector { x: 0, y: 0 },
+		}
+	}
+
+	fn input(&mut self) -> Input {
+		let key = getch();
+		if key == KEY_F4 {
+			Input::Quit
+		} else {
+			Input::None
+		}
+	}
+
+	fn draw(&mut self) {
+		erase();
+
+		getmaxyx(stdscr(), &mut self.term_size.y, &mut self.term_size.x);
+
+		self.draw_input_box();
+
+		refresh();
+	}
+
+	fn draw_input_box(&self) {
+		const BOX: [&str; 4] = [
+			"        type a word         ",
+			"|==========================|",
+			"|                          |",
+			"|==========================|",
+		];
+
+		let mut line_pos = Vector { x: 0, y: 0 };
+		getyx(stdscr(), &mut line_pos.y, &mut line_pos.x);
+
+		line_pos.x = (self.term_size.x - BOX[0].len() as i32) / 2;
+		line_pos.y += 2;
+
+		for s in BOX {
+			mvaddstr(line_pos.y, line_pos.x, s);
+			line_pos.y += 1;
+		}
+
+		addstr("\n");
+	}
+}
+
+impl Drop for Blasphemy {
+	fn drop(&mut self) {
+		endwin();
+	}
+}
+
 pub fn run() {
-	init();
+	let mut b = Blasphemy::new();
 	loop {
-		match input() {
+		match b.input() {
 			Input::Quit => break,
 			_ => (),
 		}
-		draw();
+		b.draw();
 	}
-	terminate();
-}
-
-fn init() {
-	initscr();
-	keypad(stdscr(), true);
-	cbreak();
-	timeout(INPUT_TIMEOUT);
-}
-
-fn terminate() {
-	endwin();
-}
-
-fn input() -> Input {
-	let key = getch();
-	if key == KEY_F4 {
-		Input::Quit
-	} else {
-		Input::None
-	}
-}
-
-fn draw() {
-	erase();
-
-	let mut term_size = Vector { x: 0, y: 0 };
-	getmaxyx(stdscr(), &mut term_size.y, &mut term_size.x);
-
-	draw_input_box(term_size);
-
-	addstr("Hello, world!");
-	refresh();
-}
-
-fn draw_input_box(term_size: Vector) {
-	const BOX: [&str; 4] = [
-		"        TYPE A WORD         ",
-		"|==========================|",
-		"|                          |",
-		"|==========================|",
-	];
-
-	let mut line_pos = Vector { x: 0, y: 0 };
-	getyx(stdscr(), &mut line_pos.y, &mut line_pos.x);
-
-	line_pos.x = (term_size.x - BOX[0].len() as i32) / 2;
-	line_pos.y += 2;
-
-	for s in BOX {
-		mvaddstr(line_pos.y, line_pos.x, s);
-		line_pos.y += 1;
-	}
-
-	addstr("\n");
 }
