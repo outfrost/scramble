@@ -21,7 +21,7 @@ pub fn run() {
 		}
 		draw();
 	}
-    terminate();
+	terminate();
 }
 
 fn init() {
@@ -36,13 +36,12 @@ fn terminate() {
 }
 
 fn input() -> Input {
-    let key = getch();
-    if key == KEY_F4 {
-    	Input::Quit
-    }
-    else {
-    	Input::None
-    }
+	let key = getch();
+	if key == KEY_F4 {
+		Input::Quit
+	} else {
+		Input::None
+	}
 }
 
 fn draw() {
@@ -53,8 +52,8 @@ fn draw() {
 
 	draw_input_box(term_size);
 
-    addstr("Hello, world!");
-    refresh();
+	addstr("Hello, world!");
+	refresh();
 }
 
 fn draw_input_box(term_size: Vector) {
