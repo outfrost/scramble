@@ -1,3 +1,9 @@
+use ncurses;
+
 fn main() {
-    println!("Hello, world!");
+    ncurses::initscr();
+    ncurses::addstr("Hello, world!");
+    ncurses::refresh();
+    ncurses::getch();
+    ncurses::endwin();
 }
