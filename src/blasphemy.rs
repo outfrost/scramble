@@ -12,9 +12,16 @@ struct Vector {
 	pub y: i32,
 }
 
+impl Vector {
+	pub fn new() -> Self {
+		Vector { x: 0, y: 0 }
+	}
+}
+
 struct Blasphemy {
 	gamestate: Gamestate,
 	term_size: Vector,
+	word_pos: Vector,
 }
 
 struct Gamestate {
@@ -31,9 +38,10 @@ impl Blasphemy {
 
 		Blasphemy {
 			gamestate: Gamestate {
-				word: String::with_capacity(24)
+				word: String::with_capacity(24),
 			},
-			term_size: Vector { x: 0, y: 0 },
+			term_size: Vector::new(),
+			word_pos: Vector::new(),
 		}
 	}
 
@@ -53,10 +61,12 @@ impl Blasphemy {
 
 		self.draw_input_box();
 
+		self.draw_word();
+
 		refresh();
 	}
 
-	fn draw_input_box(&self) {
+	fn draw_input_box(&mut self) {
 		const BOX: [&str; 4] = [
 			"        type a word         ",
 			"|==========================|",
@@ -64,11 +74,14 @@ impl Blasphemy {
 			"|==========================|",
 		];
 
-		let mut line_pos = Vector { x: 0, y: 0 };
+		let mut line_pos = Vector::new();
 		getyx(stdscr(), &mut line_pos.y, &mut line_pos.x);
 
 		line_pos.x = (self.term_size.x - BOX[0].len() as i32) / 2;
 		line_pos.y += 2;
+
+		self.word_pos.x = line_pos.x + 2;
+		self.word_pos.y = line_pos.y + 2;
 
 		for s in BOX {
 			mvaddstr(line_pos.y, line_pos.x, s);
@@ -76,6 +89,10 @@ impl Blasphemy {
 		}
 
 		addstr("\n");
+	}
+
+	fn draw_word(&self) {
+		mvaddstr(self.word_pos.y, self.word_pos.x, &self.gamestate.word);
 	}
 }
 
