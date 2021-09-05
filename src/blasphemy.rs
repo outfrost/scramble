@@ -104,6 +104,7 @@ impl Blasphemy {
 		mvaddstr(0, 0, " [F4] quit\n");
 
 		self.draw_input_box();
+		self.draw_letter_bank();
 
 		if let Some(_) = webster::dictionary(&self.gamestate.word) {
 			addstr("That's a word!");
@@ -115,6 +116,7 @@ impl Blasphemy {
 	}
 
 	fn draw_input_box(&mut self) {
+		#[rustfmt::skip]
 		const BOX: [&str; 5] = [
 			"        type a word         ",
 			"|==========================|",
@@ -138,6 +140,46 @@ impl Blasphemy {
 		}
 
 		addstr("\n");
+	}
+
+	fn draw_letter_bank(&self) {
+		#[rustfmt::skip]
+		const BOX: [&str; 4] = [
+			"|====|",
+			"|    |",
+			"|    |",
+			"|====|",
+		];
+
+		let mut line_pos = Vector::new();
+		getyx(stdscr(), &mut line_pos.y, &mut line_pos.x);
+
+		line_pos.y += 2;
+
+		let letters_per_row = (self.term_size.x - 20) / (BOX[0].len() + 4) as i32;
+
+		let mut row = 1;
+		for (i, letter) in self.gamestate.bank.iter().enumerate() {
+			if i >= (row * letters_per_row) as usize {
+				line_pos.y += 5;
+				row += 1;
+			}
+
+			line_pos.x = match row % 2 {
+				1 => 14,
+				_ => 10,
+			} + ((i as i32 % letters_per_row) * (BOX[0].len() + 4) as i32);
+
+			let mut line_y = line_pos.y;
+			for s in BOX {
+				mvaddstr(line_y, line_pos.x, s);
+				line_y += 1;
+			}
+
+			mvaddstr(line_pos.y + 1, line_pos.x + 2, &String::from(letter.c));
+		}
+
+		mv(line_pos.y + 4, 0);
 	}
 
 	fn draw_word(&self) {
