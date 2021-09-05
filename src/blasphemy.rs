@@ -1,7 +1,9 @@
+use nanorand::{tls::TlsWyRand, Rng};
 use ncurses::*;
 
 const INPUT_TIMEOUT: i32 = 16; // milliseconds
 const WORD_MAXLEN: usize = 24;
+const STARTING_LETTER_COUNT: usize = 12;
 
 struct Vector {
 	pub x: i32,
@@ -14,14 +16,20 @@ impl Vector {
 	}
 }
 
+struct Gamestate {
+	pub word: String,
+	pub bank: Vec<Letter>,
+	rng: TlsWyRand,
+}
+
+struct Letter {
+	pub c: char,
+}
+
 struct Blasphemy {
 	gamestate: Gamestate,
 	term_size: Vector,
 	word_pos: Vector,
-}
-
-struct Gamestate {
-	pub word: String,
 }
 
 impl Blasphemy {
@@ -32,13 +40,17 @@ impl Blasphemy {
 		timeout(INPUT_TIMEOUT);
 		noecho();
 
-		Blasphemy {
+		let mut b = Blasphemy {
 			gamestate: Gamestate {
 				word: String::with_capacity(WORD_MAXLEN),
+				bank: Vec::with_capacity(STARTING_LETTER_COUNT),
+				rng: nanorand::tls_rng(),
 			},
 			term_size: Vector::new(),
 			word_pos: Vector::new(),
-		}
+		};
+		b.fill_bank();
+		b
 	}
 
 	fn input(&mut self) -> bool {
@@ -74,6 +86,14 @@ impl Blasphemy {
 
 	fn accept_word(&mut self) {
 		self.gamestate.word.clear();
+	}
+
+	fn fill_bank(&mut self) {
+		while self.gamestate.bank.len() < STARTING_LETTER_COUNT {
+			self.gamestate.bank.push(Letter {
+				c: char::from_u32(self.gamestate.rng.generate_range(0x41..=0x5a)).unwrap(),
+			});
+		}
 	}
 
 	fn draw(&mut self) {

@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 ncurses = "5.101.0"
 webster = "0.3.0"
+nanorand = "0.6.1"
