@@ -45,14 +45,15 @@ impl Blasphemy {
 		let key = getch();
 		match key {
 			KEY_F4 => true, // quit
-			0x41 ..= 0x5a | 0x61 ..= 0x7a => { // [A-Za-z]
+			0x41..=0x5a | 0x61..=0x7a => {
+				// [A-Za-z]
 				let c = char::from_u32(key as u32).unwrap().to_ascii_uppercase();
 				if self.gamestate.word.len() < WORD_MAXLEN {
 					self.gamestate.word.push(c);
 				}
 				false
-			},
-			_ => false
+			}
+			_ => false,
 		}
 	}
 
