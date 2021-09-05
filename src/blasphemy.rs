@@ -1,11 +1,7 @@
 use ncurses::*;
 
 const INPUT_TIMEOUT: i32 = 16; // milliseconds
-
-enum Input {
-	None,
-	Quit,
-}
+const WORD_MAXLEN: usize = 24;
 
 struct Vector {
 	pub x: i32,
@@ -38,19 +34,25 @@ impl Blasphemy {
 
 		Blasphemy {
 			gamestate: Gamestate {
-				word: String::with_capacity(24),
+				word: String::with_capacity(WORD_MAXLEN),
 			},
 			term_size: Vector::new(),
 			word_pos: Vector::new(),
 		}
 	}
 
-	fn input(&mut self) -> Input {
+	fn input(&mut self) -> bool {
 		let key = getch();
-		if key == KEY_F4 {
-			Input::Quit
-		} else {
-			Input::None
+		match key {
+			KEY_F4 => true, // quit
+			0x41 ..= 0x5a | 0x61 ..= 0x7a => { // [A-Za-z]
+				let c = char::from_u32(key as u32).unwrap().to_ascii_uppercase();
+				if self.gamestate.word.len() < WORD_MAXLEN {
+					self.gamestate.word.push(c);
+				}
+				false
+			},
+			_ => false
 		}
 	}
 
@@ -105,9 +107,8 @@ impl Drop for Blasphemy {
 pub fn run() {
 	let mut b = Blasphemy::new();
 	loop {
-		match b.input() {
-			Input::Quit => break,
-			_ => (),
+		if b.input() {
+			break;
 		}
 		b.draw();
 	}
