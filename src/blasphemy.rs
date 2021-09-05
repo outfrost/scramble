@@ -53,6 +53,10 @@ impl Blasphemy {
 				}
 				false
 			}
+			0x7f | KEY_BACKSPACE => {
+				self.gamestate.word.pop();
+				false
+			}
 			_ => false,
 		}
 	}
@@ -63,6 +67,10 @@ impl Blasphemy {
 		getmaxyx(stdscr(), &mut self.term_size.y, &mut self.term_size.x);
 
 		self.draw_input_box();
+
+		if let Some(_) = webster::dictionary(&self.gamestate.word) {
+			addstr("That's a word!");
+		}
 
 		self.draw_word();
 
