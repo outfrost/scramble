@@ -54,15 +54,26 @@ impl Blasphemy {
 				false
 			}
 			0x7f | KEY_BACKSPACE => {
+				// Backspace
 				self.gamestate.word.pop();
 				false
 			}
 			0x09 | KEY_BTAB => {
+				// Tab
 				self.gamestate.word.clear();
+				false
+			}
+			0x0a | 0x0d | KEY_ENTER => {
+				// Enter
+				self.accept_word();
 				false
 			}
 			_ => false,
 		}
+	}
+
+	fn accept_word(&mut self) {
+		self.gamestate.word.clear();
 	}
 
 	fn draw(&mut self) {
