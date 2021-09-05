@@ -70,6 +70,8 @@ impl Blasphemy {
 
 		getmaxyx(stdscr(), &mut self.term_size.y, &mut self.term_size.x);
 
+		mvaddstr(0, 0, " [F4] quit\n");
+
 		self.draw_input_box();
 
 		if let Some(_) = webster::dictionary(&self.gamestate.word) {
@@ -82,11 +84,12 @@ impl Blasphemy {
 	}
 
 	fn draw_input_box(&mut self) {
-		const BOX: [&str; 4] = [
+		const BOX: [&str; 5] = [
 			"        type a word         ",
 			"|==========================|",
 			"|                          |",
 			"|==========================|",
+			"        [Tab] clear         ",
 		];
 
 		let mut line_pos = Vector::new();
