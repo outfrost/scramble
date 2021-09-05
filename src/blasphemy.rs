@@ -57,6 +57,10 @@ impl Blasphemy {
 				self.gamestate.word.pop();
 				false
 			}
+			0x09 | KEY_BTAB => {
+				self.gamestate.word.clear();
+				false
+			}
 			_ => false,
 		}
 	}
