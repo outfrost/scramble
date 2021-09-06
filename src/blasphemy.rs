@@ -53,6 +53,7 @@ impl Vector {
 struct Gamestate {
 	pub word: String,
 	pub bank: Vec<Letter>,
+	pub score: u32,
 	rng: TlsWyRand,
 }
 
@@ -87,6 +88,7 @@ impl Blasphemy {
 			gamestate: Gamestate {
 				word: String::with_capacity(WORD_MAXLEN),
 				bank: Vec::with_capacity(STARTING_LETTER_COUNT),
+				score: 0,
 				rng: nanorand::tls_rng(),
 			},
 			term_size: Vector::new(),
@@ -128,12 +130,13 @@ impl Blasphemy {
 	}
 
 	fn accept_word(&mut self) {
-		if let WordQuality::Valid(_) = self.appraise_word() {
+		if let WordQuality::Valid(points) = self.appraise_word() {
 			for c in self.gamestate.word.chars() {
 				if let Some(i) = self.gamestate.bank.iter().position(|letter| letter.c == c) {
 					self.gamestate.bank.swap_remove(i);
 				}
 			}
+			self.gamestate.score += points;
 			self.gamestate.word.clear();
 			self.fill_bank();
 		}
@@ -154,10 +157,12 @@ impl Blasphemy {
 
 		let mut available_letters = self.gamestate.bank.clone();
 		let mut missing_letters = Vec::<char>::with_capacity(WORD_MAXLEN);
+		let mut points = 0u32;
 		for c in self.gamestate.word.chars() {
 			match available_letters.iter().position(|letter| letter.c == c) {
 				Some(i) => {
-					available_letters.swap_remove(i);
+					let l = available_letters.swap_remove(i);
+					points += l.points;
 				}
 				None => {
 					missing_letters.push(c);
@@ -169,7 +174,7 @@ impl Blasphemy {
 			WordQuality::MissingLetters(missing_letters)
 		}
 		else if let Some(_) = webster::dictionary(&self.gamestate.word) {
-			WordQuality::Valid(0)
+			WordQuality::Valid(points)
 		}
 		else {
 			WordQuality::Invalid
@@ -231,7 +236,7 @@ impl Blasphemy {
 				}
 				format!("you're missing some letters: {}", list)
 			}
-			WordQuality::Valid(_) => "valid word!".into(),
+			WordQuality::Valid(points) => format!("valid word! {} points", points),
 		};
 
 		let mut line_pos = Vector::new();
