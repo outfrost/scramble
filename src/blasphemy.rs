@@ -188,6 +188,7 @@ impl Blasphemy {
 
 		mvaddstr(0, 0, " [F4] quit\n");
 
+		self.draw_score();
 		self.draw_input_box();
 		self.draw_message();
 		self.draw_letter_bank();
@@ -195,6 +196,17 @@ impl Blasphemy {
 		self.draw_word();
 
 		refresh();
+	}
+
+	fn draw_score(&self) {
+		let text = format!("| score {:6} |", self.gamestate.score);
+
+		let mut line_pos = Vector::new();
+		getyx(stdscr(), &mut line_pos.y, &mut line_pos.x);
+
+		line_pos.x = self.term_size.x - text.len() as i32 - 4;
+
+		mvaddstr(line_pos.y, line_pos.x, &text);
 	}
 
 	fn draw_input_box(&mut self) {
