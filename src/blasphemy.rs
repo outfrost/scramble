@@ -5,6 +5,40 @@ const INPUT_TIMEOUT: i32 = 16; // milliseconds
 const WORD_MAXLEN: usize = 24;
 const STARTING_LETTER_COUNT: usize = 12;
 
+const LETTERS: [Letter; 31] = [
+	Letter { c: 'A', points: 2 },
+	Letter { c: 'A', points: 2 },
+	Letter { c: 'B', points: 2 },
+	Letter { c: 'C', points: 1 },
+	Letter { c: 'D', points: 3 },
+	Letter { c: 'E', points: 3 },
+	Letter { c: 'E', points: 3 },
+	Letter { c: 'F', points: 5 },
+	Letter { c: 'G', points: 1 },
+	Letter { c: 'H', points: 1 },
+	Letter { c: 'I', points: 2 },
+	Letter { c: 'I', points: 2 },
+	Letter { c: 'J', points: 3 },
+	Letter { c: 'K', points: 5 },
+	Letter { c: 'L', points: 3 },
+	Letter { c: 'M', points: 4 },
+	Letter { c: 'N', points: 2 },
+	Letter { c: 'O', points: 2 },
+	Letter { c: 'O', points: 2 },
+	Letter { c: 'P', points: 1 },
+	Letter { c: 'Q', points: 4 },
+	Letter { c: 'R', points: 2 },
+	Letter { c: 'S', points: 1 },
+	Letter { c: 'T', points: 4 },
+	Letter { c: 'U', points: 2 },
+	Letter { c: 'U', points: 2 },
+	Letter { c: 'V', points: 5 },
+	Letter { c: 'W', points: 4 },
+	Letter { c: 'X', points: 3 },
+	Letter { c: 'Y', points: 4 },
+	Letter { c: 'Z', points: 2 },
+];
+
 struct Vector {
 	pub x: i32,
 	pub y: i32,
@@ -22,9 +56,10 @@ struct Gamestate {
 	rng: TlsWyRand,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 struct Letter {
 	pub c: char,
+	pub points: u32,
 }
 
 enum WordQuality {
@@ -100,14 +135,15 @@ impl Blasphemy {
 				}
 			}
 			self.gamestate.word.clear();
+			self.fill_bank();
 		}
 	}
 
 	fn fill_bank(&mut self) {
 		while self.gamestate.bank.len() < STARTING_LETTER_COUNT {
-			self.gamestate.bank.push(Letter {
-				c: char::from_u32(self.gamestate.rng.generate_range(0x41..=0x5a)).unwrap(),
-			});
+			self.gamestate.bank.push(
+				LETTERS[self.gamestate.rng.generate_range(0..LETTERS.len())]
+			);
 		}
 	}
 
