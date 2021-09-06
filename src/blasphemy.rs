@@ -93,7 +93,14 @@ impl Blasphemy {
 	}
 
 	fn accept_word(&mut self) {
-		self.gamestate.word.clear();
+		if let WordQuality::Valid(_) = self.appraise_word() {
+			for c in self.gamestate.word.chars() {
+				if let Some(i) = self.gamestate.bank.iter().position(|letter| letter.c == c) {
+					self.gamestate.bank.swap_remove(i);
+				}
+			}
+			self.gamestate.word.clear();
+		}
 	}
 
 	fn fill_bank(&mut self) {
