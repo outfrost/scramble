@@ -2,4 +2,4 @@
 * [x] put random letters in bank
 * [x] accept valid words
 * [x] give points for valid words
-* [ ] the whole http thing
+* [x] the whole http thing

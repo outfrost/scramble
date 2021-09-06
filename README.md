@@ -10,12 +10,24 @@ I am never touching ncurses again.
 cargo run
 ```
 
+Requires `libncurses`. Tested with `libncurses6`, but 5 should theoretically work too.
+
 ## How to play
 
 You have a bank of letters. Make words using those letters.
 
 Every time you enter a valid word, you get points, and the letters you've used from your bank are replaced with new, random ones.
 
+**Give your viewers** the address of your server. Tell them to send HTTP GET requests of the form:
+
+```
+http://<server address>:8000/replace/a/with/z
+```
+
+They can help you, or make you suffer :)
+
+Enjoy!
+
 ## Notes
 
-Yes, please do look at the code on stream. Chances for increased suffering unknown.
+Feel free to look at the code on stream. Chances for increased suffering unknown.
