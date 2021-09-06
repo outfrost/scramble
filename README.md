@@ -26,7 +26,7 @@ http://<server address>:8000/replace/a/with/z
 
 They can help you, or make you suffer :)
 
-Enjoy!
+Make sure your terminal size is at least 90x29 or something like that. Enjoy!
 
 ## Notes
 
