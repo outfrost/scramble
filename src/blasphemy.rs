@@ -216,7 +216,7 @@ impl Blasphemy {
 			"|==========================|",
 			"|                          |",
 			"|==========================|",
-			"        [Tab] clear         ",
+			" [Tab] clear [Enter] accept ",
 		];
 
 		let mut line_pos = Vector::new();
@@ -255,18 +255,19 @@ impl Blasphemy {
 		getyx(stdscr(), &mut line_pos.y, &mut line_pos.x);
 
 		line_pos.x = (self.term_size.x - message.len() as i32) / 2;
-		line_pos.y += 2;
+		line_pos.y += 1;
 
 		mvaddstr(line_pos.y, line_pos.x, &message);
+		addch('\n'.into());
 	}
 
 	fn draw_letter_bank(&self) {
 		#[rustfmt::skip]
 		const BOX: [&str; 4] = [
-			"|====|",
+			"/----\\",
 			"|    |",
 			"|    |",
-			"|====|",
+			"\\----/",
 		];
 
 		let mut line_pos = Vector::new();
@@ -295,6 +296,7 @@ impl Blasphemy {
 			}
 
 			mvaddstr(line_pos.y + 1, line_pos.x + 2, &String::from(letter.c));
+			mvaddstr(line_pos.y + 2, line_pos.x + 1, &format!("{:4}", letter.points));
 		}
 
 		mv(line_pos.y + 4, 0);
