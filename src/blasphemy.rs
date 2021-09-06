@@ -22,8 +22,16 @@ struct Gamestate {
 	rng: TlsWyRand,
 }
 
+#[derive(Clone)]
 struct Letter {
 	pub c: char,
+}
+
+enum WordQuality {
+	TooShort,
+	Invalid,
+	MissingLetters(Vec<char>),
+	Valid(u32),
 }
 
 struct Blasphemy {
@@ -96,6 +104,35 @@ impl Blasphemy {
 		}
 	}
 
+	fn appraise_word(&self) -> WordQuality {
+		if self.gamestate.word.len() < 3 {
+			return WordQuality::TooShort;
+		}
+
+		let mut available_letters = self.gamestate.bank.clone();
+		let mut missing_letters = Vec::<char>::with_capacity(WORD_MAXLEN);
+		for c in self.gamestate.word.chars() {
+			match available_letters.iter().position(|letter| letter.c == c) {
+				Some(i) => {
+					available_letters.swap_remove(i);
+				}
+				None => {
+					missing_letters.push(c);
+				}
+			}
+		}
+
+		if !missing_letters.is_empty() {
+			WordQuality::MissingLetters(missing_letters)
+		}
+		else if let Some(_) = webster::dictionary(&self.gamestate.word) {
+			WordQuality::Valid(0)
+		}
+		else {
+			WordQuality::Invalid
+		}
+	}
+
 	fn draw(&mut self) {
 		erase();
 
@@ -104,11 +141,8 @@ impl Blasphemy {
 		mvaddstr(0, 0, " [F4] quit\n");
 
 		self.draw_input_box();
+		self.draw_message();
 		self.draw_letter_bank();
-
-		if let Some(_) = webster::dictionary(&self.gamestate.word) {
-			addstr("That's a word!");
-		}
 
 		self.draw_word();
 
@@ -140,6 +174,30 @@ impl Blasphemy {
 		}
 
 		addstr("\n");
+	}
+
+	fn draw_message(&self) {
+		let message: String = match self.appraise_word() {
+			WordQuality::TooShort => "type at least 3 letters".into(),
+			WordQuality::Invalid => "that's not in my dictionary".into(),
+			WordQuality::MissingLetters(vec) => {
+				let mut list = String::with_capacity(64);
+				for c in vec {
+					list.push(c);
+					list.push_str(", ");
+				}
+				format!("you're missing some letters: {}", list)
+			}
+			WordQuality::Valid(_) => "valid word!".into(),
+		};
+
+		let mut line_pos = Vector::new();
+		getyx(stdscr(), &mut line_pos.y, &mut line_pos.x);
+
+		line_pos.x = (self.term_size.x - message.len() as i32) / 2;
+		line_pos.y += 2;
+
+		mvaddstr(line_pos.y, line_pos.x, &message);
 	}
 
 	fn draw_letter_bank(&self) {

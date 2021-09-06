@@ -7,6 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+nanorand = "0.6.1"
 ncurses = "5.101.0"
 webster = "0.3.0"
-nanorand = "0.6.1"
