@@ -1,5 +1,7 @@
+use std::sync::mpsc::Receiver;
 use nanorand::{tls::TlsWyRand, Rng};
 use ncurses::*;
+use crate::service::Command;
 
 const INPUT_TIMEOUT: i32 = 16; // milliseconds
 const WORD_MAXLEN: usize = 24;
@@ -74,10 +76,11 @@ struct Blasphemy {
 	gamestate: Gamestate,
 	term_size: Vector,
 	word_pos: Vector,
+	command_rx: Receiver<Command>,
 }
 
 impl Blasphemy {
-	pub fn new() -> Self {
+	pub fn new(command_rx: Receiver<Command>) -> Self {
 		initscr();
 		keypad(stdscr(), true);
 		cbreak();
@@ -93,9 +96,24 @@ impl Blasphemy {
 			},
 			term_size: Vector::new(),
 			word_pos: Vector::new(),
+			command_rx,
 		};
 		b.fill_bank();
 		b
+	}
+
+	fn process_commands(&mut self) {
+		match self.command_rx.try_recv() {
+			Ok((replace, with)) => {
+				if let Some(i) = self.gamestate.bank.iter().position(|letter| letter.c == replace) {
+					if let Some(l) = LETTERS.iter().find(|letter| letter.c == with) {
+						let mut letter = l.clone();
+						std::mem::swap(&mut self.gamestate.bank[i], &mut letter);
+					}
+				}
+			}
+			_ => ()
+		}
 	}
 
 	fn input(&mut self) -> bool {
@@ -313,9 +331,10 @@ impl Drop for Blasphemy {
 	}
 }
 
-pub fn run() {
-	let mut b = Blasphemy::new();
+pub fn run(command_rx: Receiver<Command>) {
+	let mut b = Blasphemy::new(command_rx);
 	loop {
+		b.process_commands();
 		if b.input() {
 			break;
 		}
