@@ -1,11 +1,13 @@
 use std::{sync::mpsc, thread};
-use tokio::{runtime::Runtime, task::JoinHandle};
+use tokio::runtime::Runtime;
 
 mod blasphemy;
 mod service;
 
 fn main() {
+	println!("decompressing dictionary");
 	webster::preload();
+	println!("starting game");
 
 	let (command_tx, command_rx) = mpsc::channel();
 

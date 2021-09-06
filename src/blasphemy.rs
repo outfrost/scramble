@@ -5,7 +5,7 @@ use std::sync::mpsc::Receiver;
 
 const INPUT_TIMEOUT: i32 = 16; // milliseconds
 const WORD_MAXLEN: usize = 24;
-const STARTING_LETTER_COUNT: usize = 12;
+const STARTING_LETTER_COUNT: usize = 14;
 
 const LETTERS: [Letter; 31] = [
 	Letter { c: 'A', points: 2 },
@@ -213,7 +213,7 @@ impl Blasphemy {
 		self.draw_input_box();
 		self.draw_message();
 		self.draw_letter_bank();
-
+		self.draw_viewer_instructions();
 		self.draw_word();
 
 		refresh();
@@ -325,6 +325,29 @@ impl Blasphemy {
 		}
 
 		mv(line_pos.y + 4, 0);
+	}
+
+	fn draw_viewer_instructions(&self) {
+		const INSTRUCTIONS: [&str; 5] = [
+			"for viewers:",
+			"to swap letters in the bank, type this into your browser:",
+			"http://<server address>:8000/replace/<what>/with/<what>",
+			"for example:",
+			"http://127.0.0.1:8000/replace/a/with/z",
+		];
+
+		let mut line_pos = Vector::new();
+		getyx(stdscr(), &mut line_pos.y, &mut line_pos.x);
+
+		line_pos.y += 2;
+
+		for s in INSTRUCTIONS {
+			line_pos.x = (self.term_size.x - s.len() as i32) / 2;
+
+			mvaddstr(line_pos.y, line_pos.x, s);
+			line_pos.y += 1;
+		}
+		addch('\n'.into());
 	}
 
 	fn draw_word(&self) {

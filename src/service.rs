@@ -27,7 +27,7 @@ pub async fn run(command_tx: Sender<Command>) {
 }
 
 async fn process_req(request: http::Request<Body>) -> ResponseResult {
-	let (parts, body) = request.into_parts();
+	let (parts, _) = request.into_parts();
 	if parts.method != Method::GET {
 		return Ok(error_response(
 			StatusCode::METHOD_NOT_ALLOWED,
@@ -85,7 +85,7 @@ async fn process_req(request: http::Request<Body>) -> ResponseResult {
 
 	if let Some(mutex) = unsafe { &COMMAND_TX } {
 		if let Ok(tx) = mutex.lock() {
-			tx.send((replace, with));
+			let _ = tx.send((replace, with));
 		}
 	}
 
