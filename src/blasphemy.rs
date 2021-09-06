@@ -1,7 +1,7 @@
-use std::sync::mpsc::Receiver;
+use crate::service::Command;
 use nanorand::{tls::TlsWyRand, Rng};
 use ncurses::*;
-use crate::service::Command;
+use std::sync::mpsc::Receiver;
 
 const INPUT_TIMEOUT: i32 = 16; // milliseconds
 const WORD_MAXLEN: usize = 24;
@@ -105,14 +105,19 @@ impl Blasphemy {
 	fn process_commands(&mut self) {
 		match self.command_rx.try_recv() {
 			Ok((replace, with)) => {
-				if let Some(i) = self.gamestate.bank.iter().position(|letter| letter.c == replace) {
+				if let Some(i) = self
+					.gamestate
+					.bank
+					.iter()
+					.position(|letter| letter.c == replace)
+				{
 					if let Some(l) = LETTERS.iter().find(|letter| letter.c == with) {
 						let mut letter = l.clone();
 						std::mem::swap(&mut self.gamestate.bank[i], &mut letter);
 					}
 				}
 			}
-			_ => ()
+			_ => (),
 		}
 	}
 
@@ -162,9 +167,9 @@ impl Blasphemy {
 
 	fn fill_bank(&mut self) {
 		while self.gamestate.bank.len() < STARTING_LETTER_COUNT {
-			self.gamestate.bank.push(
-				LETTERS[self.gamestate.rng.generate_range(0..LETTERS.len())]
-			);
+			self.gamestate
+				.bank
+				.push(LETTERS[self.gamestate.rng.generate_range(0..LETTERS.len())]);
 		}
 	}
 
@@ -190,11 +195,9 @@ impl Blasphemy {
 
 		if !missing_letters.is_empty() {
 			WordQuality::MissingLetters(missing_letters)
-		}
-		else if let Some(_) = webster::dictionary(&self.gamestate.word) {
+		} else if let Some(_) = webster::dictionary(&self.gamestate.word) {
 			WordQuality::Valid(points)
-		}
-		else {
+		} else {
 			WordQuality::Invalid
 		}
 	}
@@ -314,7 +317,11 @@ impl Blasphemy {
 			}
 
 			mvaddstr(line_pos.y + 1, line_pos.x + 2, &String::from(letter.c));
-			mvaddstr(line_pos.y + 2, line_pos.x + 1, &format!("{:4}", letter.points));
+			mvaddstr(
+				line_pos.y + 2,
+				line_pos.x + 1,
+				&format!("{:4}", letter.points),
+			);
 		}
 
 		mv(line_pos.y + 4, 0);

@@ -7,11 +7,11 @@ mod service;
 fn main() {
 	webster::preload();
 
-    let (command_tx, command_rx) = mpsc::channel();
+	let (command_tx, command_rx) = mpsc::channel();
 
 	thread::spawn(|| {
-	   	let runtime = Runtime::new().unwrap();
-		runtime.block_on(service::run(command_tx));	
+		let runtime = Runtime::new().unwrap();
+		runtime.block_on(service::run(command_tx));
 	});
 
 	let ui_thread = thread::spawn(move || blasphemy::run(command_rx));

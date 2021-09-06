@@ -1,7 +1,7 @@
-use std::convert::Infallible;
-use std::sync::{mpsc::Sender, Mutex};
 use http::{Method, Response, StatusCode};
 use hyper::Body;
+use std::convert::Infallible;
+use std::sync::{mpsc::Sender, Mutex};
 
 pub type Command = (char, char);
 type ResponseResult = hyper::Result<Response<Body>>;
@@ -31,12 +31,14 @@ async fn process_req(request: http::Request<Body>) -> ResponseResult {
 	if parts.method != Method::GET {
 		return Ok(error_response(
 			StatusCode::METHOD_NOT_ALLOWED,
-			"Method not allowed\n".into()
+			"Method not allowed\n".into(),
 		));
 	}
 
 	// "/replace/a/with/z"
-	let segments: Vec<&str> = parts.uri.path()
+	let segments: Vec<&str> = parts
+		.uri
+		.path()
 		.split('/')
 		.filter(|s| !s.is_empty())
 		.collect();
@@ -47,22 +49,40 @@ async fn process_req(request: http::Request<Body>) -> ResponseResult {
 		|| !segments[2].eq_ignore_ascii_case("with")
 		|| segments[3].len() != 1
 	{
-		return Ok(error_response(StatusCode::BAD_REQUEST, "Bad request (check your URL format)\n".into()));
+		return Ok(error_response(
+			StatusCode::BAD_REQUEST,
+			"Bad request (check your URL format)\n".into(),
+		));
 	}
 
 	let replace = match segments[1].chars().next() {
 		Some(c) => c,
-		None => return Ok(error_response(StatusCode::BAD_REQUEST, "Bad request (invalid letter)\n".into())),
-	}.to_ascii_uppercase();
+		None => {
+			return Ok(error_response(
+				StatusCode::BAD_REQUEST,
+				"Bad request (invalid letter)\n".into(),
+			))
+		}
+	}
+	.to_ascii_uppercase();
 	let with = match segments[3].chars().next() {
 		Some(c) => c,
-		None => return Ok(error_response(StatusCode::BAD_REQUEST, "Bad request (invalid letter)\n".into())),
-	}.to_ascii_uppercase();
+		None => {
+			return Ok(error_response(
+				StatusCode::BAD_REQUEST,
+				"Bad request (invalid letter)\n".into(),
+			))
+		}
+	}
+	.to_ascii_uppercase();
 
 	if !replace.is_ascii_uppercase() || !with.is_ascii_uppercase() {
-		return Ok(error_response(StatusCode::BAD_REQUEST, "Bad request (invalid letter)\n".into()));
+		return Ok(error_response(
+			StatusCode::BAD_REQUEST,
+			"Bad request (invalid letter)\n".into(),
+		));
 	}
-	
+
 	if let Some(mutex) = unsafe { &COMMAND_TX } {
 		if let Ok(tx) = mutex.lock() {
 			tx.send((replace, with));
